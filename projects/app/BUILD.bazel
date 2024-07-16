@@ -1,0 +1,12 @@
+
+py_library(
+    name = "stocknota_app",
+    srcs = ["asgi.py"],
+    deps = ["@pypi//litestar",]
+)
+
+py_binary(
+    name = "run",
+    srcs = ["run.py"],
+    deps = ["//projects/app:stocknota_app"]
+)
