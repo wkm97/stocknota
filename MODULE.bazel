@@ -1,16 +1,58 @@
 # Update the version "0.0.0" to the release found here:
 # https://github.com/bazelbuild/rules_python/releases.
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.8")
+bazel_dep(name = "aspect_rules_py", version = "0.7.3")
 bazel_dep(name = "rules_python", version = "0.33.2")
-
-PYTHON_VERSION = "3.12"
+bazel_dep(name = "rules_oci", version = "1.8.0")
+bazel_dep(name = "platforms", version = "0.0.10")
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
-python.toolchain(python_version = PYTHON_VERSION, is_default = True)
+python.toolchain(
+    python_version = "3.12",
+    is_default = True
+)
 
+# pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+# pip.parse(
+#     hub_name = "pypi",
+#     python_version = "3.12",
+#     requirements_lock = "//:requirements_lock.txt",
+# )
+# use_repo(pip, "pypi")
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
     hub_name = "pypi",
-    python_version = PYTHON_VERSION,
+    python_version = "3.12",
     requirements_lock = "//:requirements_lock.txt",
 )
 use_repo(pip, "pypi")
+
+
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+oci.pull(
+    name = "ubuntu",
+    image = "ubuntu",
+    platforms = [
+        "linux/arm64/v8",
+        "linux/amd64",
+    ],
+    digest = "sha256:340d9b015b194dc6e2a13938944e0d016e57b9679963fdeb9ce021daac430221",
+)
+
+# oci.pull(
+#     name = "ubuntu",
+#     image = "python",
+#     platforms = [
+#         "linux/arm64/v8",
+#         "linux/amd64",
+#     ],
+#     digest = "sha256:f11725aba18c19664a408902103365eaf8013823ffc56270f921d1dc78a198cb",
+# )
+
+# oci.pull(
+#     name = "ubuntu",
+#     digest = "sha256:ccaef5ee2f1850270d453fdf700a5392534f8d1a8ca2acda391fbb6a06b81c86",
+#     image = "gcr.io/distroless/base",
+#     platforms = ["linux/amd64","linux/arm64"],
+# )
+use_repo(oci, "ubuntu")

@@ -7,4 +7,5 @@ bazelisk run //:requirements.update
 bash .vscode/setup_virtual.sh # For vscode interpreter
 
 ibazel run projects/app:run
+bazelisk run projects/app:tarball && docker run --rm gcr.io/stocknota_app:latest
 ```

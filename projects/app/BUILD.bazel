@@ -1,12 +1,56 @@
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
+load("@aspect_rules_py//py:defs.bzl", "py_binary", "py_library")
+load("@rules_oci//oci:defs.bzl", "oci_tarball")
+load("//:py_layer.bzl", "py_oci_image")
+
 
 py_library(
     name = "stocknota_app",
     srcs = ["asgi.py"],
-    deps = ["@pypi//litestar",]
+    deps = ["@pypi//litestar"]
 )
 
 py_binary(
     name = "run",
-    srcs = ["run.py"],
-    deps = ["//projects/app:stocknota_app"]
+    srcs = ["__main__.py"],
+    deps = ["//projects/app:stocknota_app"],
+    main = "__main__.py"
+)
+
+py_oci_image(
+    name = "image",
+    base = "@ubuntu",
+    binary = "run",
+    entrypoint = ["/projects/app/run"],
+)
+
+platform(
+    name = "aarch64_linux",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+)
+
+platform(
+    name = "x86_64_linux",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+platform_transition_filegroup(
+    name = "platform_image",
+    srcs = [":image"],
+    target_platform = select({
+        "@platforms//cpu:arm64": ":aarch64_linux",
+        "@platforms//cpu:x86_64": ":x86_64_linux",
+    }),
+)
+
+oci_tarball(
+    name = "tarball",
+    image = ":platform_image",
+    repo_tags = ["gcr.io/stocknota_app:latest"],
 )
