@@ -1,3 +1,5 @@
 litestar[standard]
 alembic
 SQLAlchemy
+typer
+asyncpg
